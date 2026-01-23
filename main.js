@@ -33,7 +33,7 @@ let TOKEN;
 let API_KEY;
 let API_KEY_OPENROUTER;
 
-import config from "./config.json" assert { type: "json" };
+// import config from "./config.json" assert { type: "json" };
 
 try {
     API_KEY = config.TOKEN_GEMINI;
