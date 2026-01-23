@@ -147,7 +147,7 @@ async function main(args) {
             content = msg.text || '';
 
             if (content.toLowerCase() == (pref + 'хелп').toLowerCase() || content.toLowerCase() == (pref + 'help').toLowerCase() || content.toLowerCase() == (pref + 'команды').toLowerCase()) {
-                bot.sendMessage(chatId, '<b>ABOBA</b> Bot − Ремейк легендарного бота из 2021 в Телеграме.\n\nКоманды<a href="https://files.catbox.moe/yxuuaz.png">:</a>\n<pre>' + hArr[0] + hArr[1] + hArr[2] + hArr[3] + hArr[4] + hArr[5] + hArr[6] + hArr[7], {
+                bot.sendMessage(chatId, '<b>ABOBA</b> Bot − Ремейк легендарного бота из 2021 в Телеграме.\n\nКоманды<a href="https://files.catbox.moe/yxuuaz.png">:</a>\n<pre>' + hArr[0] + hArr[1] + hArr[2] + hArr[3] + hArr[4] + hArr[5] + hArr[6] + hArr[7] + "</pre>", {
                     parse_mode: `HTML`,
                     reply_to_message_id: msg.message_id,
                 });
@@ -1042,5 +1042,3 @@ async function main(args) {
 }
 
 main();
-
-
