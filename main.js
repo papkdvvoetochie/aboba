@@ -1,28 +1,28 @@
-import { fetch } from `undici`;
+import { fetch } from "undici";
 globalThis.fetch = fetch;
-import TelegramBot from `node-telegram-bot-api`;
-import gTTS from `gtts`;
-import fs from `fs`;
-import { spawn } from `child_process`;
-import { GoogleGenAI, Language } from `@google/genai`;
-import { exec, execFileSync } from `child_process`;
-import ytdl from `ytdl-core`;
-import OpenAI from `openai`;
-import LanguageDetect from `languagedetect`;
-import translatte from `translatte`;
-import qrterm from `qrcode-terminal`;
-import qrcode from `qrcode`;
-import Tesseract from `tesseract.js`;
-import Parser from `rss-parser`; // для униана
-import { argv, constrainedMemory, exit, stdout } from `process`;
-import { match, rejects } from `assert`;
-import { resolve } from `path`;
-import { Chat } from `openai/resources/index.mjs`;
-import { VM } from `vm2`; // песочница для выполнения кода
-import util from `util`;
-import { channel } from `diagnostics_channel`;
-import { HttpsProxyAgent } from `https-proxy-agent`;
-import * as cheerio from `cheerio`;
+import TelegramBot from "node-telegram-bot-api";
+import gTTS from "gtts";
+import fs from "fs";
+import { spawn } from "child_process";
+import { GoogleGenAI, Language } from "@google/genai";
+import { exec, execFileSync } from "child_process";
+import ytdl from "ytdl-core";
+import OpenAI from "openai";
+import LanguageDetect from "languagedetect";
+import translatte from "translatte";
+import qrterm from "qrcode-terminal";
+import qrcode from "qrcode";
+import Tesseract from "tesseract.js";
+import Parser from "rss-parser"; // для униана
+import { argv, constrainedMemory, exit, stdout } from "process";
+import { match, rejects } from "assert";
+import { resolve } from "path";
+import { Chat } from "openai/resources/index.mjs";
+import { VM } from "vm2"; // песочница для выполнения кода
+import util from "util";
+import { channel } from "diagnostics_channel";
+import { HttpsProxyAgent } from "https-proxy-agent";
+import * as cheerio from "cheerio";
 
 /*
 *   ABOBA BOT
