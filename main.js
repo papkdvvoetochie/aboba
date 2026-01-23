@@ -147,7 +147,7 @@ async function main(args) {
             content = msg.text || '';
 
             if (content.toLowerCase() == (pref + 'хелп').toLowerCase() || content.toLowerCase() == (pref + 'help').toLowerCase() || content.toLowerCase() == (pref + 'команды').toLowerCase()) {
-                bot.sendMessage(chatId, '📖<b>Помощь</b>\n   Страница 1\n\nКоманды<a href="https://files.catbox.moe/yxuuaz.png">: </a>\n<blockquote>' + hArr[0] + hArr[1] + hArr[2] + hArr[3] + hArr[4] + hArr[5] + hArr[6] + hArr[7] + "</blockquote>", {
+                bot.sendMessage(chatId, '📖<b>Помощь</b>\n\nКоманды:<a href="https://files.catbox.moe/yxuuaz.png">ㅤ</a>\n<blockquote>' + hArr[0] + hArr[1] + hArr[2] + hArr[3] + hArr[4] + hArr[5] + hArr[6] + hArr[7] + "</blockquote>", {
                     parse_mode: `HTML`,
                     reply_to_message_id: msg.message_id,
                 });
@@ -979,7 +979,7 @@ async function main(args) {
             }
 
             else if (content == pref + 'инфо') {
-                bot.sendMessage(chatId, `<b>ABOBA</b> Bot − Ремейк легендарного бота из 2021 в Телеграме.\n@tg_aboba_bot\n\nБот:<blockquote>⚙️Написан на — JavaScript\n💫Создатель — <a href=\`t.me/burnderd\`>@Burnderd</a>\n📈Статус — работает</blockquote>\nБиблиотеки:<blockquote>💭Перевод — Translatte\n👁️OCR — Tesseract.js\n🎙️TTS — gTTS\n🎥Загрузка видео — ytdl</blockquote>`, {
+                bot.sendMessage(chatId, '<b>ABOBA</b> Bot − Ремейк легендарного бота из 2021 в Телеграме.\n@tg_aboba_bot\n\nБот:<blockquote>⚙️Написан на — JavaScript\n💫Создатель — <a href=\`t.me/burnderd\`>@Burnderd</a>\n📈Статус — работает</blockquote>\nБиблиотеки:<blockquote>💭Перевод — Translatte\n👁️OCR — Tesseract.js\n🎙️TTS — gTTS\n🎥Загрузка видео — ytdl</blockquote>', {
                     parse_mode: `HTML`,
                     reply_to_message_id: msg.message_id
                 });
