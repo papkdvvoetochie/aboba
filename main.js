@@ -35,7 +35,7 @@ import * as cheerio from "cheerio";
 // try {
 //     apiGemini = config.tgToken_GEMINI;
 //     apiOpenrouter = config.tgToken_OPENAI;
-     tgToken = process.env.BOT_tgToken || process.env.TELEGRAM_tgToken;
+     tgToken = process.env.BOT_TOKEN || process.env.TELEGRAM_TOKEN;
 // } catch (cant_decode_tgToken) {
 //     console.error('ERROR - ' + cant_decode_tgToken.message);
 //     exit(0);
@@ -1043,3 +1043,4 @@ async function main(args) {
 }
 
 main();
+
