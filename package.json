@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "node-telegram-bot-api": "^0.66.0",
+    "openai": "^4.30.0",
 
     "@google/genai": "^1.32.0",
     "@openrouter/sdk": "^0.2.11",
