@@ -1,6 +1,14 @@
 {
+  "name": "aboba-bot",
+  "version": "1.0.0",
   "type": "module",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
   "dependencies": {
+    "node-telegram-bot-api": "^0.66.0",
+
     "@google/genai": "^1.32.0",
     "@openrouter/sdk": "^0.2.11",
     "@ybd-project/ytdl-core": "^6.0.8",
