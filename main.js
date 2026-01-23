@@ -34,16 +34,16 @@ let API_KEY;
 let API_KEY_OPENROUTER;
 
 // import config from "./config.json" assert { type: "json" };
-
-try {
-    API_KEY = config.TOKEN_GEMINI;
-    API_KEY_OPENROUTER = config.TOKEN_OPENAI;
-    TOKEN = process.env.BOT_TOKEN || process.env.TELEGRAM_TOKEN;
-} catch (cant_decode_token) {
-    console.error('ERROR - ' + cant_decode_token.message);
-    exit(0);
+if (false) {
+    try {
+        API_KEY = config.TOKEN_GEMINI;
+        API_KEY_OPENROUTER = config.TOKEN_OPENAI;
+        TOKEN = process.env.BOT_TOKEN || process.env.TELEGRAM_TOKEN;
+    } catch (cant_decode_token) {
+        console.error('ERROR - ' + cant_decode_token.message);
+        exit(0);
+    }
 }
-
 let current_date = new Date().toString();
 let chatid;
 let chatname;
@@ -1041,3 +1041,4 @@ async function main(args) {
 }
 
 main();
+
