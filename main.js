@@ -35,14 +35,13 @@ import * as cheerio from "cheerio";
 // try {
 //     apiGemini = config.tgToken_GEMINI;
 //     apiOpenrouter = config.tgToken_OPENAI;
-     tgToken = process.env.BOT_TOKEN || process.env.TELEGRAM_TOKEN;
 // } catch (cant_decode_tgToken) {
 //     console.error('ERROR - ' + cant_decode_tgToken.message);
 //     exit(0);
 // }
 
 
-let tgToken;
+let tgToken = process.env.BOT_TOKEN || process.env.TELEGRAM_TOKEN;
 let apiGemini;
 let apiOpenrouter;
 let currentDate;
@@ -1043,4 +1042,5 @@ async function main(args) {
 }
 
 main();
+
 
