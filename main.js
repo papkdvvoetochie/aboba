@@ -138,7 +138,7 @@ async function main(args) {
         `——— Остальное ———\n`,
         `<pre>!юзер − Информация о Юзере.\n!статус − Статус бота.\n!инфо − Информация о боте.\n!повтори − Эхо текста (HTML).</pre>`,
     ]
-    
+
     // массив с страницами для инлайн кнопок (их пока нет)
 
     bot.on('message', async (msg) => {
@@ -148,8 +148,7 @@ async function main(args) {
             content = msg.text || '';
 
             if (content.toLowerCase() == (pref + 'хелп').toLowerCase() || content.toLowerCase() == (pref + 'help').toLowerCase() || content.toLowerCase() == (pref + 'команды').toLowerCase()) {
-                bot.sendPhoto(chatId, 'https://files.catbox.moe/yxuuaz.png', {
-                    caption: '<b>ABOBA</b> Bot − Ремейк легендарного бота из 2021 в Телеграме.\n\nКоманды:\n<pre>' + hArr[0] + hArr[1] + hArr[2] + hArr[3] + hArr[4] + hArr[5] + hArr[6] + hArr[7] + `</pre>`,
+                bot.sendMessage(chatId, '<b>ABOBA</b> Bot − Ремейк легендарного бота из 2021 в Телеграме.\n\nКоманды<a href="https://files.catbox.moe/yxuuaz.png">:</a>\n<pre>' + hArr[0] + hArr[1] + hArr[2] + hArr[3] + hArr[4] + hArr[5] + hArr[6] + hArr[7], {
                     parse_mode: `HTML`,
                     reply_to_message_id: msg.message_id,
                 });
