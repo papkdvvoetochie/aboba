@@ -11,15 +11,27 @@
     "openai": "^4.30.0",
 
     "@google/genai": "^1.32.0",
-    "@openrouter/sdk": "^0.2.11",
-    "@ybd-project/ytdl-core": "^6.0.8",
-    "cheerio": "^1.1.2",
+
+    "undici": "^6.19.2",
     "gtts": "^0.2.1",
-    "https-proxy-agent": "^7.0.6",
+
+    "ytdl-core": "^4.11.5",
+    "@ybd-project/ytdl-core": "^6.0.8",
+
+    "languagedetect": "^2.0.0",
+    "translatte": "^3.0.1",
+
     "qrcode": "^1.5.4",
-    "rss-parser": "^3.13.0",
+    "qrcode-terminal": "^0.12.0",
+
     "tesseract.js": "^6.0.1",
+
+    "rss-parser": "^3.13.0",
+
     "vm2": "^3.10.0",
-    "ytdl-core": "^4.11.5"
+
+    "https-proxy-agent": "^7.0.6",
+
+    "cheerio": "^1.1.2"
   }
 }
