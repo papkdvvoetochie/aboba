@@ -2,36 +2,33 @@
   "name": "aboba-bot",
   "version": "1.0.0",
   "type": "module",
-  "main": "main.js",
+  "main": "dist/main.js",
   "scripts": {
-    "start": "node main.js"
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "dev": "ts-node main.ts"
   },
   "dependencies": {
     "node-telegram-bot-api": "^0.66.0",
     "openai": "^4.30.0",
-
     "@google/genai": "^1.32.0",
-    
     "gtts": "^0.2.1",
-
     "ytdl-core": "^4.11.5",
     "@ybd-project/ytdl-core": "^6.0.8",
-
     "languagedetect": "^2.0.0",
     "translatte": "^3.0.1",
-
     "qrcode": "^1.5.4",
     "qrcode-terminal": "^0.12.0",
-
     "tesseract.js": "^6.0.1",
-
     "rss-parser": "^3.13.0",
-
     "vm2": "^3.10.0",
-
     "https-proxy-agent": "^7.0.6",
-
     "cheerio": "1.0.0-rc.12",
     "undici": "5.28.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "ts-node": "^10.9.2",
+    "@types/node": "^20.11.0"
   }
 }
