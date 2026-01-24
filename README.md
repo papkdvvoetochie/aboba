@@ -1,1 +1,1 @@
-![photo_2026-01-24_14-35-41](https://github.com/user-attachments/assets/24870044-c330-45bb-b7c6-cb9921242408)
+<img width="800" height="560" alt="aboba" src="https://github.com/user-attachments/assets/c1781465-fd2e-4d5c-83e9-aadb7972061b" />
