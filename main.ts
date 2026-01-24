@@ -1,5 +1,7 @@
-import { fetch } from "undici";
-globalThis.fetch = fetch;
+import { fetch as undiciFetch } from "undici";
+
+(globalThis as any).fetch = undiciFetch;
+
 import TelegramBot from "node-telegram-bot-api";
 import gTTS from "gtts";
 import fs from "fs";
@@ -22,6 +24,8 @@ import { VM } from "vm2"; // песочница для выполнения ко
 import util from "util";
 import { channel } from "diagnostics_channel";
 import { HttpsProxyAgent } from "https-proxy-agent";
+import { throwLog, throwErr, returnName } from "./tools.js";
+import say from "./tts.js";
 import * as cheerio from "cheerio";
 
 /*
@@ -30,69 +34,47 @@ import * as cheerio from "cheerio";
 *   @version vh.z
 */
 
-// import config from `./config.json` assert { type: `json` };
+let tgToken: string = process.env.BOT_TOKEN || process.env.TELEGRAM_TOKEN;
+let apiGemini: string;
+let apiOpenrouter: string;
+let currentDate: string;
+let chatId: number;
+let chatName: string;
+let content: string;
+let fileName: any;
+let has: boolean;
 
-// try {
-//     apiGemini = config.tgToken_GEMINI;
-//     apiOpenrouter = config.tgToken_OPENAI;
-// } catch (cant_decode_tgToken) {
-//     console.error('ERROR - ' + cant_decode_tgToken.message);
-//     exit(0);
-// }
+const pref: string = `!`;
+const blank: string = "ㅤ";
 
+const banned: any = [1499458036]; // те кто буянил (пока не используется)
 
-let tgToken = process.env.BOT_TOKEN || process.env.TELEGRAM_TOKEN;
-let apiGemini;
-let apiOpenrouter;
-let currentDate;
-let chatId;
-let chatName;
-let content;
-let fileName;
-let has;
-
-let pref = `!`;
-const logInfo = 'INFO - ';
-const logError = 'ERROR - ';
-
-const banned = [1499458036]; // те кто буянил (пока не используется)
-
-const bot = new TelegramBot(tgToken, {
+const bot: any = new TelegramBot(tgToken, {
     polling: true 
 });
 
-const openai = new OpenAI({
+const openai: any = new OpenAI({
     apiKey: `apiOpenrouter`
 });
 
-const vm = new VM({
+const vm: any = new VM({
     timeout: 800,
     sandbox: {
         Math
     }
 });
 
-const detectLang = new LanguageDetect();
+const detectLang: any = new LanguageDetect();
 
-async function throwLog(text) {
-    let currentDate = new Date().toLocaleString();
-    console.log(`[ ${currentDate.replace(`GMT+0300 (Москва, стандартное время)`, ``)}] ${logInfo}${text}`);
-}
-
-async function throwErr(text) {
-    let currentDate = new Date().toLocaleString();
-    console.error(`[ ${currentDate.replace(`GMT+0300 (Москва, стандартное время)`, ``)}] ${logError}${text}`);
-}
-
-async function genPhoto(prompt) {
+async function genPhoto(prompt: any): Promise<any> {
     // раньше тут были прокси для обхода лимитов но сейчас они не нужны
 
-    let pResponse;
-    let buffer;
+    let pResponse: any;
+    let buffer: any;
     
     try {
         pResponse = await fetch(`https://image.pollinations.ai/prompt/` + encodeURIComponent(prompt));
-        buffer = await p_response.arrayBuffer();
+        buffer = await pResponse.arrayBuffer();
     } catch (cant_fetch_image) {
         throwErr(cant_fetch_image.message);
     }
@@ -101,33 +83,22 @@ async function genPhoto(prompt) {
     else return Buffer.from(buffer);
 }
 
-async function sayNnave(say) {
-    fileName = Math.floor(Math.random() * 1000000);
+async function sayNnave(say: any): Promise<void> {
+    fileName = returnName(".mp3");
     let tts;
 
-    const srcLang = detectLang.detect(say);
-    throwLog(`RAW:`, JSON.stringify(srcLang));
+    const srcLang: any = detectLang.detect(say);
 
     return new Promise((resolve, reject) => {
-        try {
-            tts.save(`sounds/` + fileName + '.mp3', (error) => {
-                if (error) {
-                    reject(error);
-                } else {
-                    resolve(fileName);
-                }
-            });
-        } catch (cant_save_tts) {
-            throwErr(cant_save_tts.message);
-        }
+        say(say, fileName);
     });
 }
 
-async function main(args) {
-    bot.on('error', xe => throwErr(xe.message));
-    bot.on('polling_error', xe => throwErr(xe.message));
+async function main(): Promise<void> {
+    bot.on('error', err => throwErr(err.message));
+    bot.on('polling_error', err => throwErr(err.message));
 
-    const hArr = [
+    const hArr: any = [
         `——— Приколы ———\n`,
         `!картинка − Случайная картинки.\n!анекдот − Случайный анекдот.\n!оск [1..4]  − Генерация мата до 4 слов.\n!елшизм − Актуальные новости Шамана и Мизулины.\n!приколдня − Самый смешной прикол дня.\n!инфо / проц [] − Да или нет.\n`,
         `——— ИИ ———\n`,
@@ -147,7 +118,7 @@ async function main(args) {
             content = msg.text || '';
 
             if (content.toLowerCase() == (pref + 'хелп').toLowerCase() || content.toLowerCase() == (pref + 'help').toLowerCase() || content.toLowerCase() == (pref + 'команды').toLowerCase()) {
-                bot.sendMessage(chatId, '📖<b>Помощь</b>\n\nКоманды:<a href="https://files.catbox.moe/yxuuaz.png">ㅤ</a>\n<blockquote>' + hArr[0] + hArr[1] + hArr[2] + hArr[3] + hArr[4] + hArr[5] + hArr[6] + hArr[7] + "</blockquote>", {
+                bot.sendMessage(chatId, '⚙️<b>Команды</b>:<a href="https://files.catbox.moe/yxuuaz.png">\n' + blank + '</a>\n<blockquote>' + hArr[0] + hArr[1] + hArr[2] + hArr[3] + hArr[4] + hArr[5] + hArr[6] + hArr[7] + "</blockquote>", {
                     parse_mode: `HTML`,
                     reply_to_message_id: msg.message_id,
                 });
@@ -155,7 +126,7 @@ async function main(args) {
 
             else if (content.toLowerCase() === (pref + 'картинка').toLowerCase() || content.toLowerCase() == (pref + 'прикол').toLowerCase() || content.toLowerCase() == (pref + 'picture').toLowerCase()) {
                 try {
-                    let num = Math.floor(Math.random() * 15);
+                    let num: any = Math.floor(Math.random() * 15);
                     throwLog('Random num = ' + num);
 
                     try {
@@ -175,46 +146,54 @@ async function main(args) {
             }
 
             else if (content.startsWith(pref + 'оск ') || content.startsWith(pref + 'оск')) {
-                let count = content.slice((pref + 'оск ').length);
+                let count: any = content.slice((pref + 'оск ').length);
                 let finalStr;
 
-                const msgArr = [`Гомосятский`, `Лошпедский`, `Пидорский`, `Ниггерский`, `Далдовский`, `Сосущий`, 
-                            `Гейский`, `Волосатый`, `Лохматый`, `Какашный`, `Обоссаный`, `Обосранный`, `Залупный`, 
-                            `Ебланский`, `Дрочильный`];
+                const msgArr: any = [`Гомосятский`, `Лошпедский`, `Пидорский`, `Ниггерский`, `Далдовский`, `Сосущий`, 
+                                    `Гейский`, `Волосатый`, `Лохматый`, `Какашный`, `Обоссаный`, `Обосранный`, `Залупный`, 
+                                    `Ебланский`, `Дрочильный`];
                 
-                const msgArr2 = [`Бурятский мультик`, `сосатель`, `олух`, `гомосек`, `нигга`, `далдо`, `член`,
-                            `лошпед`, `кака`, `свеня`, `свиник`, `анус`, `свин`, `петух`, `лохмач`, `залупа`, `клитор`,
-                            `хуй`, `еблан`, `дрочила`];
+                const msgArr2: any = [`Бурятский мультик`, `сосатель`, `олух`, `гомосек`, `нигга`, `далдо`, `член`,
+                                    `лошпед`, `кака`, `свеня`, `свиник`, `анус`, `свин`, `петух`, `лохмач`, `залупа`, `клитор`,
+                                    `хуй`, `еблан`, `дрочила`];
     
-                const msgArr3 = [`сосал`, `дрочил`, `лизал`, `нюхал`, `вылизал`, `разбил`, `сломал`, `взорвал`, `умер`, 
-                            `зажёг`, `вынес`, `ободрал`, `обосрал`, `обоссал`, `отсосал`, `отлизал`, `отдрочил`, `залупил`, `залупался`];
+                const msgArr3: any = [`сосал`, `дрочил`, `лизал`, `нюхал`, `вылизал`, `разбил`, `сломал`, `взорвал`, `умер`, 
+                                    `зажёг`, `вынес`, `ободрал`, `обосрал`, `обоссал`, `отсосал`, `отлизал`, `отдрочил`, `залупил`, `залупался`];
     
-                const msgArr4 = [`клитор`, `хуй`, `дадло`, `залупу`, `что-то`, `ничего`, `?`, `ниггу`, `себя`, `Капи`, 
-                            `геев`, `бурят мультику`, `Абобу`, `свиника`, `[Секретно]`, `анус`, `петуха`, `свина`, `каку`, 
-                            `лохмача`];
+                const msgArr4: any = [`клитор`, `хуй`, `дадло`, `залупу`, `что-то`, `ничего`, `?`, `ниггу`, `себя`, `Капи`, 
+                                    `геев`, `бурят мультику`, `Абобу`, `свиника`, `[Секретно]`, `анус`, `петуха`, `свина`, `каку`, 
+                                    `лохмача`];
 
-                let x = Math.floor(Math.random() * msgArr.length);
-                let y = Math.floor(Math.random() * msgArr2.length);
-                let z = Math.floor(Math.random() * msgArr3.length);
-                let p = Math.floor(Math.random() * msgArr4.length);
+                function randomInt(i: any): any {
+                    return Math.floor(Math.random() * i);
+                }
 
-                if (count <= 2 || count == 0) finalStr = msgArr[x] + ' ' + msgArr2[y];
+                switch (count) {
+                    case 1:
+                    case 2:
+                        finalStr = msgArr[randomInt(msgArr.length)] + ' ' + msgArr2[randomInt(msgArr2.length)];
+                        break;
+                    
+                    case 3:
+                        finalStr = msgArr[randomInt(msgArr.length)] + ' ' + msgArr2[randomInt(msgArr3.length)] + ' ' + msgArr3[randomInt(msgArr3.length)];
+                        break;
 
-                else if (count == 3) finalStr = msgArr[x] + ' ' + msgArr2[y] + ' ' + msgArr3[z];
+                    case 4:
+                        finalStr = msgArr[randomInt(msgArr.length)] + ' ' + msgArr2[randomInt(msgArr2.length)] + ' ' + msgArr3[randomInt(msgArr3.length)] + ' ' + msgArr4[randomInt(msgArr4.length)];
+                        break;
+                }
 
-                else if (count <= 4) finalStr = msgArr[x] + ' ' + msgArr2[y] + ' ' + msgArr3[z] + ' ' + msgArr4[p];
-
-                else finalStr = msgArr[x] + ' ' + msgArr2[y];
-
-                bot.sendMessage(chatId, finalStr, {
-                    reply_to_message_id: msg.message_id
-                });
+                if (finalStr != null) {
+                    bot.sendMessage(chatId, finalStr, {
+                        reply_to_message_id: msg.message_id
+                    });
+                }
             }
 
             else if (content == pref + 'елшизм') {
-                const reply = [`Пока нет информации`, `Информации нет`, `Спроси позже`, `Агентство ЕЛШИЗМ сегодня молчит...`];
-                let lastNews = 'Заглушка...';
-                let replyVar = Math.floor(Math.random() * 4);
+                const reply: any = [`Пока нет информации`, `Информации нет`, `Спроси позже`, `Агентство ЕЛШИЗМ сегодня молчит...`];
+                let lastNews: any = 'Заглушка...';
+                let replyVar: any = Math.floor(Math.random() * 4);
 
                 if (!has) {
                     bot.sendMessage(chatId, reply[replyVar] + '\n\nПоследняя новость:\n<blockquote>' + lastNews + '</blockquote>', {
@@ -231,8 +210,8 @@ async function main(args) {
             }
 
             else if (content.startsWith(pref + 'скажи ')) {
-                const srcFile = content.slice((pref + 'скажи ').length);
-                let del = false;
+                const srcFile: any = content.slice((pref + 'скажи ').length);
+                let del: any = false;
 
                 try {
                     try {
@@ -242,7 +221,7 @@ async function main(args) {
                             reply_to_message_id: msg.message_id
                         });
                     }
-                    console.log(fileName);
+                    throwLog(fileName);
 
                     await new Promise(ex => setTimeout(ex, 300));
                     if (fs.existsSync('sounds/' + fileName + '.mp3')) {
@@ -269,18 +248,18 @@ async function main(args) {
             }
 
             else if (content.startsWith(pref + `ии `)) {
-                const parts = content.slice((pref + 'ии ').length);
-                const allowed = false;
+                const parts: any = content.slice((pref + 'ии ').length);
+                const allowed: any = false;
 
                 if (allowed) {
                     try {
-                        const stdout = await execFileSync( // снова питоновские мосты
+                        const stdout: any = await execFileSync( // снова питоновские мосты
                             `python`,
                             [`-X`, `utf8`, `ai_bridge.py`, parts],
                             { maxBuffer: 1024 * 1024, encoding: `utf-8` }
                         ); // мрази не делают для жс нормльные библиотеки
 
-                        const answer = stdout.trim() || `...`;
+                        const answer: any = stdout.trim() || `...`;
                     
                         bot.sendMessage(chatId, answer, {
                             parse_mode: `Markdown`,
@@ -297,19 +276,21 @@ async function main(args) {
             }
 
             else if (content.startsWith(pref + 'иифото')) {
-                const allowed = false;
+                const allowed: boolean = false;
                 if (!allowed) {
-                    let sliceParts = content.slice((pref + 'иифото ').length);
-                    let fileName = 'images/' + Math.floor(Math.random() * 1000000) + '.png';
-                    let isNsfw = false;
+                    let sliceParts: string = content.slice((pref + 'иифото ').length);
+                    let fileName: string = 'images/' + Math.floor(Math.random() * 1000000) + '.png';
+                    let isNsfw: boolean = false;
                     let toTranslateSrc;
                     let parts;
+
+                    const toBuffer: boolean = true;
 
                     toTranslateSrc = await translatte(sliceParts, {
                         to: 'en'
                     }); // чтобы нейронка лучше понимала промпт
 
-                    let translatedParts = toTranslateSrc.text;
+                    let translatedParts: string = toTranslateSrc.text;
 
                     throwLog(translatedParts);
 
@@ -331,7 +312,8 @@ async function main(args) {
                         case `minor`:
                         case `teen`:
                         case `childs`:
-                            sliceParts = `Большая и видная надпись \`IDI NAHUI\``;
+                            sliceParts = `Большая и видная надпись \"IDI NAHUI\"`;
+                            break;
                     }
 
                     if (isNsfw && !(chatId === -1002737828895)) {
@@ -347,29 +329,46 @@ async function main(args) {
 
                         if (sliceParts.includes(`naked`) || sliceParts.includes(`big`) || sliceParts.includes(`boobs`) || sliceParts.includes(`penis`)) { // старая проверка
                             isNsfw = true;
+                            let buffer: ArrayBuffer = null;
+
                             if (chatId === -1002737828895) {
                                 genPhoto(parts).then(img => {
                                     try {
-                                        fs.writeFileSync(fileName, img);
+                                        if (toBuffer) buffer = img;
+                                        else fs.writeFileSync(fileName, img);
                                     } catch (cant_write_file_ii) {
                                         throwErr(cant_write_file_ii.message);
                                     }
                                     try {
-                                        let buffer = fs.readFileSync(fileName);
+                                        if (!toBuffer) {
+                                            let fsBuffer: any = fs.readFileSync(fileName);
 
-                                        if (!buffer.contains(`Google Media Processing Services`)) {
-                                            bot.sendPhoto(chatId, fileName, {
-                                                caption: 'Картинка Сгенерирована:',
-                                                reply_to_message_id: msg.message_id
-                                            });
+                                            if (!fsBuffer.contains(`Google Media Processing Services`)) {
+                                                bot.sendPhoto(chatId, fileName, {
+                                                    caption: 'Картинка Сгенерирована:',
+                                                    reply_to_message_id: msg.message_id
+                                                });
 
-                                            buffer = ``;
+                                                fsBuffer = ``;
+                                            } else {
+                                                bot.sendMessage(chatId, `Чё-то не так... Рейт лимит`, {
+                                                    reply_to_message_id: msg.message_id
+                                                });
+
+                                                fsBuffer = ``;
+                                            }
                                         } else {
-                                            bot.sendMessage(chatId, `Чё-то не так... Рейт лимит`, {
-                                                reply_to_message_id: msg.message_id
-                                            });
-
-                                            buffer = ``;
+                                            try {
+                                                bot.sendPhoto(chatId, buffer, {
+                                                    caption: "Картинка Сгенерирована:",
+                                                    reply_to_message_id: msg.message_id
+                                                });
+                                            } catch (e) {
+                                                throwErr(e.message);
+                                                bot.sendMessage(chatId, `Чё-то не так... ${e.message}`, {
+                                                    reply_to_message_id: msg.message_id
+                                                });
+                                            }
                                         }
                                     } catch (cant_send_file_ii) {
                                         throwErr(cant_send_file_ii.message);
@@ -377,7 +376,8 @@ async function main(args) {
                                     }
                                 });
                             } else if (isNsfw && !(chatId === -1002737828895)) {
-                                bot.sendMessage(chatId, 'NSFW Разрешён только тут - https://t.me/+y6H620kqS1phNGFi', {
+                                const link: any = "https://t.me/+y6H620kqS1phNGFi"; // если вдруг надо будет поменять
+                                bot.sendMessage(chatId, `NSFW Разрешён только тут - ${link}`, {
                                     reply_to_message_id: msg.message_id
                                 });
                             }
@@ -387,7 +387,7 @@ async function main(args) {
                                 try {
                                     fs.writeFileSync(fileName, img);
                                 } catch (cant_write_file) {
-                                    console.error(logError + cant_write_file.message);
+                                    throwErr(cant_write_file.message);
                                 }
                                 try {
                                     bot.sendPhoto(chatId, fileName, {
@@ -395,13 +395,13 @@ async function main(args) {
                                         reply_to_message_id: msg.message_id
                                     });
                                 } catch (cant_send_file) {
-                                    console.error(logError + cant_send_file.message);
+                                    throwErr(cant_send_file.message);
                                     bot.sendMessage(chatId, `Чё-то не так... ` + cant_send_file.message);
                                 }
                             });
                         }
                     } catch (cant_generate_photo) {
-                        console.error(logError + cant_generate_photo.message);
+                        throwErr(cant_generate_photo.message);
                         bot.sendMessage(chatId, 'Чё-то не так... ' + cant_generate_photo.message, {
                             reply_to_message_id: msg.message_id
                         });
@@ -415,7 +415,7 @@ async function main(args) {
                 
             
             else if (content.startsWith(pref + 'вbase64 ') || content.startsWith(pref + 'ibase64 ')) {
-                const parts = content.slice((pref + 'вbase64 ').length);
+                const parts: any = content.slice((pref + 'вbase64 ').length);
                 let toB64;
 
                 try {
@@ -435,7 +435,7 @@ async function main(args) {
                     try {
                         toB64 = toB64.replace(/[^A-Za-z0-9+/=]/g, ``);
                     } catch (error) {
-                        console.error(logError + error.message);
+                        throwErr(error.message);
                     }
                 }
 
@@ -446,13 +446,13 @@ async function main(args) {
             }
 
             else if (content.startsWith(pref + `изbase64 `) || content.startsWith(pref + 'frbase64 ')) {
-                const parts = content.slice((pref + 'изbase64 ').length);
+                const parts: any = content.slice((pref + 'изbase64 ').length);
                 let fromB64
 
                 try {
                     fromB64 = atob(parts);
                 } catch (cant_decode) {
-                    console.error(logError + cant_decode.message + ', пробуем фаллбек...');
+                    throwErr(cant_decode.message + ', пробуем фаллбек...');
                     fromB64 = Buffer.from(parts, `base64`).toString(`utf8`);
                 }
 
@@ -463,13 +463,13 @@ async function main(args) {
             }
 
             else if (content.startsWith(pref + 'переведи ')) {
-                const parts = content.slice((pref + 'переведи ').length).trim();
-                const spaceIdx = parts.indexOf(' ');
+                const parts: any = content.slice((pref + 'переведи ').length).trim();
+                const spaceIdx: any = parts.indexOf(' ');
                 let translated;
 
-                let toLang = parts.slice(0, spaceIdx).trim();
+                let toLang: any = parts.slice(0, spaceIdx).trim();
 
-                let srcLang = parts.slice(spaceIdx + 1).trim();
+                let srcLang: any = parts.slice(spaceIdx + 1).trim();
 
                 try {
                     translated = await translatte(srcLang, {
@@ -505,15 +505,14 @@ async function main(args) {
             }
 
             else if (content.startsWith(pref + 'видео ')) {
-                let parts = content.slice((pref + 'видео ').length);
-                let videoName = Math.floor(Math.random() * 1000) + '.mp4';
-                let downloaded = false;
+                let parts: any = content.slice((pref + 'видео ').length);
+                let videoName: any = Math.floor(Math.random() * 1000) + '.mp4';
 
                 try {
                     await new Promise ((resolve, reject) => {
                             exec('python video_downloader.py ' + parts +  ' ' + videoName + ' ' + '\`18/best[height<=360]\`', // для жс нет нормальных довнлодеров видео 
                                 { maxBuffer: 1024 * 1024 * 200 },
-                                (err, stdout, stderr) => err ? reject(err) : resolve(stdout)
+                                ( err, stdout, stderr ) => err ? reject(err) : resolve(stdout)
                             )
                         });
                     
@@ -521,34 +520,32 @@ async function main(args) {
                         caption: 'Видео загружено:',
                         reply_to_message_id: msg.message_id
                     });
-                    
-                    downloaded = true;
                 } catch (cant_download) {
                     bot.sendMessage(chatId, 'Чё-то не так... ' + cant_download.message, {
                         reply_to_message_id: msg.message_id
                     });
-                    console.error(logError + cant_download.message);
+                    throwErr(cant_download.message);
                 }
 
-                if (downloaded) {
+                if (fs.existsSync(videoName)) {
                     try {
                         fs.unlinkSync(videoName);
                     } catch (cant_delete_2) {
-                        console.error(logError + cant_delete_2.message);
+                        throwErr(cant_delete_2.message);
                     }
                 }
             }
 
             else if (content == pref + 'юзер') {
-                const target = msg.from;
+                let target = msg.reply_to_message?.from || msg.from;
 
                 if (msg.entities) {
-                    const mention = msg.entities.find(entity => entity.type === 'mention');
+                    const mention: any = msg.entities.find(entity => entity.type === 'mention');
 
                     if (mention) { // не работает
-                        const uName = content.slice(mention.offset + 1, mention.offset + mention.length);
+                        const uName: any = content.slice(mention.offset + 1, mention.offset + mention.length);
                         try {
-                            const userInfo = await bot.getChatMember(chatId, uName);
+                            const userInfo: any = await bot.getChatMember(chatId, uName);
                             target = userInfo.user;
                         } catch (cant_get_user) {
                             bot.sendMessage(chatId, 'Чё-то не так... ' + cant_get_user.message, {
@@ -559,32 +556,30 @@ async function main(args) {
                     }
                 }
 
-                const userId = target.id || '<b>Не указан</b>';
-                const userName = target.userName || '<b>Не указан</b>';
-                const lastName = target.lastName || '<b>Не указана</b>';
-                const firstName = target.firstName || '<b>Не указано</b>';
-                const isBot = target.isBot || `<b>Нет</b>`;
-                const premium = target.premium || `<b>Нет</b>`;
-                const lang = target.language_code || `<b>Неизвестно</b>`;
-                const pfpList = await bot.getUserProfilePhotos(userId, {
-                    limit: 1
-                });
+                const userId: any = target.id || '<b>Не указан</b>';
+                const userName: any = target.username || '<b>Не указан</b>';
+                const lastName: any = target.last_name || '<b>Не указана</b>';
+                const firstName: any = target.first_name || '<b>Не указано</b>';
+                const isBot: any = target.is_bot || `<b>Нет</b>`;
+                const premium: any = target.premium || `<b>Нет</b>`;
+                const lang: any = target.language_code || `<b>Неизвестно</b>`;
+                const pfpList: any = await bot.getUserProfilePhotos(userId, { limit: 1 });
             
                 let pfp;
 
                 if (pfpList.total_count === 0) pfp = 'images/no_pfp.png';
 
-                else pfp = pfpList.photos[0][0].fileId;
+                else pfp = pfpList.photos[0][0].file_id;
                 
                 bot.sendPhoto(chatId, pfp, {
                     parse_mode: `HTML`,
-                    caption: 'Информация о юзере:\n' + '<blockquote>' + 'Юзернейм — <a href=`t.me/' + userName + '`>@' + userName + '</a>\nID — <a href=`tg://openmessage?userId=' + userId + '`>' + userId + '</a>\n——————\nИмя — ' + firstName + '\nФамилия — ' + lastName + '\n——————\nБот — ' + isBot + '\nПремиум — ' + premium + '\nЯзык — ' + lang + '</blockquote>',
+                    caption: 'Информация о юзере:\n' + '<blockquote>' + 'Юзернейм — <a href="t.me/' + userName + '">@' + userName + '</a>\nID — <a href="tg://openmessage?userId=' + userId + '">' + userId + '</a>\n——————\nИмя — ' + firstName + '\nФамилия — ' + lastName + '\n——————\nБот — ' + isBot + '\nПремиум — ' + premium + '\nЯзык — ' + lang + '</blockquote>',
                     reply_to_message_id: msg.message_id
                 });
             }
 
             else if (content == pref + 'приколдня') {
-                const strArr = [`42 брат`, `52`, `свага`, `танец покойного`, `окак`, `67`, `Кролик с часиками`, `чурка в анархии фурри кидает`, `#попка`, `22`, `POZI`];
+                const strArr: any = [`42 брат`, `52`, `свага`, `танец покойного`, `окак`, `67`, `Кролик с часиками`, `чурка в анархии фурри кидает`, `#попка`, `22`, `POZI`];
 
                 bot.sendMessage(chatId, `ПРИКОЛ ДНЯ: ` + strArr[Math.floor(Math.random() * strArr.length)], {
                     reply_to_message_id: msg.message_id
@@ -592,9 +587,9 @@ async function main(args) {
             }
             
             else if (content.startsWith(pref + 'математика ')) {
-                const plus = content.slice((pref + 'математика ').length);
+                const plus: any = content.slice((pref + 'математика ').length);
                 let result;
-                let i = 0; // колхоз
+                let i: any = 0; // колхоз
 
                 try {
                     if (!(plus.includes(`process`) || plus.includes(`require`) || plus.includes(`import`) || plus.includes(`fs`) || plus.includes(`child_process`) || plus.includes(`exec`) || plus.includes(`execSync`) || plus.includes(`function`) || plus.includes(`constructor`) || plus.includes(`while`) || plus.includes(`for`) || plus.includes(`=>`) || plus.includes(`{`) || plus.includes(`}`) || plus.includes(`;`) || plus.includes(`repeat`))) { // защита от мразей которые пыюатся положить бота 
@@ -625,10 +620,10 @@ async function main(args) {
 
                 else if (content.includes(`проц`)) viewInfo = false;
 
-                const info = content.slice((pref + 'инфо ').length);
-                const num = Math.floor(Math.random() * 5);
-                const proc = Math.floor(Math.random() * 100);
-                const replyVar = [`Да`, `Возможно частично`, `Не знаю`, `Скорее нет`, `Нет`];
+                const info: any = content.slice((pref + 'инфо ').length);
+                const num: any = Math.floor(Math.random() * 5);
+                const proc: any = Math.floor(Math.random() * 100);
+                const replyVar: any = [`Да`, `Возможно частично`, `Не знаю`, `Скорее нет`, `Нет`];
 
                 if (viewInfo) {
                     bot.sendMessage(chatId, '<blockquote>«' + info + '»</blockquote>' + replyVar[num], {
@@ -644,9 +639,9 @@ async function main(args) {
             }
 
             else if (content.startsWith(pref + 'qrterm ')) { // ради прикола
-                const toQrTerm = content.slice((pref + 'qrterm ').length);
+                const toQrTerm: any = content.slice((pref + 'qrterm ').length);
 
-                const qr = qrterm.generate(toQrTerm, {
+                const qr: any = qrterm.generate(toQrTerm, {
                     small: true
                 }, (qr_string) => {
                     bot.sendMessage(chatId, qr_string, {
@@ -657,7 +652,7 @@ async function main(args) {
 
             else if (content.startsWith(pref + 'qrcode ')) {
                 let buff;
-                const toQrCode = content.slice((pref + 'qrcode ').length);
+                const toQrCode: any = content.slice((pref + 'qrcode ').length);
 
                 try {
                     buff = await qrcode.toBuffer(toQrCode);
@@ -671,14 +666,14 @@ async function main(args) {
 
             else if (content == pref + 'ocr') {
                 try { // тоже не работает
-                    const fileId = msg.photo[msg.photo.length - 1].fileId;
-                    const file = await bot.getFile(fileId);
-                    const fileName = Math.floor(Math.random() * 15);
-                    const url = 'https://api.telegram.org/file/bot/' + tgToken + file.file_path;
+                    const fileId: any = msg.photo[msg.photo.length - 1].fileId;
+                    const file: any = await bot.getFile(fileId);
+                    const fileName: any = Math.floor(Math.random() * 15);
+                    const url: any = 'https://api.telegram.org/file/bot/' + tgToken + file.file_path;
 
-                    const response = await fetch(url);
-                    const buff = await response.buff();
-                    const temp = 'temp_' + fileName + '.png';
+                    const response: any = await fetch(url);
+                    const buff: any = await response.buff();
+                    const temp: any = 'temp_' + fileName + '.png';
                     fs.writeFileSync(temp, buff);
 
                     const {
@@ -699,9 +694,9 @@ async function main(args) {
             }
 
             else if (content.startsWith(pref + 'execrun ') || content.startsWith(pref + 'execrun')) {
-                let toFile = content.slice(('!execrun ').length);
-                let fileName = 'scripts/' + Math.floor(Math.random() * 99999999999999999999999999) + '.js'; // бешеное число
-                let lang = 'JS'; // только жс пока что
+                let toFile: any = content.slice(('!execrun ').length);
+                let fileName: any = 'scripts/' + Math.floor(Math.random() * 99999999999999999999999999) + '.js'; // бешеное число
+                let lang: any = 'JS'; // только жс пока что
 
                 if (msg.from.id === 6533950587 && msg.from.userName == 'Burnderd') { // для элиты
                     if (toFile.includes('import') && (!(msg.from.id === 6533950587) || toFile.includes('input'))) {
@@ -713,12 +708,12 @@ async function main(args) {
                             try {
                                 fs.writeFileSync(fileName, toFile);
                             } catch (cant_write) {
-                                console.error(logError + cant_write.message);
+                                throwErr(cant_write.message);
 
-                                const char = 'qwertyuiopasdfghjklzxcvbnm';
+                                const char: any = 'qwertyuiopasdfghjklzxcvbnm';
                                 fileName = '';
 
-                                for (let i = 0; i < char.length; i++) {
+                                for (let i: any = 0; i < char.length; i++) {
                                     if (lang == 'JS') {
                                         fileName += char[Math.floor(Math.random() * 10)] + '.js';
                                     }
@@ -747,11 +742,11 @@ async function main(args) {
                     }
                 } else {
                     // ограниченная версия для лохов
-                    let risk = [`import`, `require`, `=>`, `process`, `ip`, `remove`, `eval`, `constructor`, `function`, 
+                    let risk: any = [`import`, `require`, `=>`, `process`, `ip`, `remove`, `eval`, `constructor`, `function`, 
                         `system32`, `tgToken.txt`, `tgToken_b64.txt`, `cd /`, `fetch`, 'C:', `32`, `PS`, `PowerShell`, `CMD`, 
                         `Terminal`, `wsl`, `xterm`, `windir`, `win32`, `explorer`, `openUrl:`, `stdout`, `stdin`, `exec`];
 
-                    let allowed = true;
+                    let allowed: any = true;
                     let stdOut;
 
                     for (const word of risk) {
@@ -784,7 +779,7 @@ async function main(args) {
             } // плейсхолдер
 
             else if (content.startsWith(pref + 'повтори')) {
-                let repeat = content.slice((pref + 'повтори').length); 
+                let repeat: any = content.slice((pref + 'повтори').length); 
 
                 repeat = repeat.replaceAll(`@`, `[@]`)
                 repeat = repeat.replaceAll(`ㅤ`, ``);
@@ -802,7 +797,7 @@ async function main(args) {
                     } catch (cant_send) {
                         throwErr(cant_send.message);
                         bot.sendMessage(chatId, `Чё-то не так... ` + cant_send.message, {
-                            reply_to_message_id: message_id
+                            reply_to_message_id: msg.message_id
                         })
                     } 
                 } else {
@@ -813,9 +808,9 @@ async function main(args) {
             }
 
             else if (content.startsWith(pref + 'транслит ')) { // не работает
-                let toSrc = content.slice((pref + 'транслит ').length);
+                let toSrc: any = content.slice((pref + 'транслит ').length);
 
-                const charMap = {q:'й', w:'ц', e:'у', r:'к', t:'е', y:'н', u:'г', i:'ш', o:'щ', p:'з', '[':'х', ']':'ъ', a:'ф', s:'ы', d:'в', f:'а', g:'п', h:'р', j:'о', k:'л', l:'д', z:'я'};
+                const charMap: any = {q:'й', w:'ц', e:'у', r:'к', t:'е', y:'н', u:'г', i:'ш', o:'щ', p:'з', '[':'х', ']':'ъ', a:'ф', s:'ы', d:'в', f:'а', g:'п', h:'р', j:'о', k:'л', l:'д', z:'я'};
 
                 try {
                     toSrc = toSrc.replaceAll(/[a-z]/, c => charMap[c] || '\'?\'', {
@@ -837,32 +832,32 @@ async function main(args) {
             }
 
             else if (content.startsWith(pref + 'длинна ')) {
-                const msgLength = content.slice((pref + 'длинна ').length).length;
+                const msgLength: any = content.slice((pref + 'длинна ').length).length;
 
-                bot.sendMessage(chatId, 'Длинна текста — ' + msgLength + ' символов', {
+                bot.sendMessage(chatId, `Длинна текста — ${msgLength} символов`, {
                     reply_to_message_id: msg.message_id
                 });
             }
 
             else if (content == pref + 'офвпышывпш' || content == pref + 'владизболгарии' || content == pref + 'владизбеларуси' || content == pref + 'владизнорильска' || content == pref + 'владотбългария') {
-                bot.sendMessage(chatId, ' VLAD VLAD VLAD<a href=`https://files.catbox.moe/apr2h1.mp4`>: </a>', {
+                bot.sendMessage(chatId, ` VLAD VLAD VLAD:<a href="https://files.catbox.moe/apr2h1.mp4">${blank}</a>`, {
                     reply_to_message_id: msg.message_id,
                     parse_mode: `HTML`
                 });
             }
 
             else if (content.startsWith(pref + 'реддит ')) {
-                let search = content.slice((pref + 'поискфото ').length);
+                let search: any = content.slice((pref + 'реддит ').length);
                 search = search.replace(` `, `+`);
 
-                const response = await (await fetch(`https://www.reddit.com/search.json?q=` + search + `&restrict_sr=off&sort=relevance&t=all`)).json();
+                const response: any = await (await fetch(`https://www.reddit.com/search.json?q=` + search + `&restrict_sr=off&sort=relevance&t=all`)).json();
                 try {
                     bot.sendMessage(chatId, response.data.children[0].data.url, {
                         parse_mode: `HTML`,
                         reply_to_message_id: msg.message_id
                     });
                 } catch (no_results) {
-                    bot.sendMessage(chatId, `По запросу '${search}' не найдено результатов.`, {
+                    bot.sendMessage(chatId, `По запросу \"${search}\" не найдено результатов.`, {
                         parse_mode: `HTML`,
                         reply_to_message_id: msg.message_id
                     })
@@ -876,7 +871,7 @@ async function main(args) {
             }
 
             else if (content == pref + 'мазута') {
-                const num = Math.floor(Math.random() * 3);
+                const num: any = Math.floor(Math.random() * 3);
 
                 bot.sendVideo(chatId, 'images/serov/' + num + '.mp4', {
                     reply_to_message_id: msg.message_id
@@ -886,10 +881,10 @@ async function main(args) {
             // https://cdn.discordapp.com/attachments/1454075217012981954/1462023276593414142/VID_20251214_000401_805.mp4?ex=696caecc&is=696b5d4c&hm=1f3f5f3e1f3e4e1e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff&
 
             else if (content.startsWith(pref + 'донат ')) { // заглушка
-                const blacklist = 1;
+                const blacklist: any = 1;
                 
                 if (msg.from.id != blacklist) {
-                    const text = content.slice((pref + 'донат ').length);
+                    const text: any = content.slice((pref + 'донат ').length);
                     let user_name;
                     if ((msg.from.firstName).length < 15) {
                         user_name = msg.from.firstName;
@@ -925,17 +920,17 @@ async function main(args) {
             // новое
 
             else if (content.startsWith(pref + 'анекдот')) {
-                const response = await (await fetch(`https://www.anekdot.ru/random/anekdot/`)).text();
+                const response: any = await (await fetch(`https://www.anekdot.ru/random/anekdot/`)).text();
                 const $ = cheerio.load(response);
-                const joke = $('.text').first().text().trim();
+                const joke: any = $('.text').first().text().trim();
                 bot.sendMessage(chatId, 'АНЕКДОТ: ' + joke, {
                     reply_to_message_id: msg.message_id
                 });
             }
 
             else if (content.startsWith(pref + 'реверс ')) {
-                const parts = content.slice((pref + 'реверс ').length);
-                const reversed = parts.split('').reverse().join('');
+                const parts: any = content.slice((pref + 'реверс ').length);
+                const reversed: any = parts.split('').reverse().join('');
 
                 bot.sendMessage(chatId, 'Реверс: ' + reversed, {
                     reply_to_message_id: msg.message_id
@@ -943,9 +938,9 @@ async function main(args) {
             }
 
             else if (content == pref + 'айди') { // фури айди
-                const id = msg.from.id;
+                const id: any = msg.from.id;
 
-                bot.sendMessage(chatId, `Твой ID: <a href=\`tg://openmessage?userId=${id}\`>` + id + `</a>`, {
+                bot.sendMessage(chatId, `Твой Айди − <a href=\`tg://openmessage?userId=${id}\`>` + id + `</a>`, {
                     reply_to_message_id: msg.message_id,
                     parse_mode: `HTML`
                 });
@@ -953,8 +948,8 @@ async function main(args) {
             // без апи
             else if (content.startsWith(pref + 'прогноз ')) {
                 try {
-                    const city = content.slice((pref + 'прогноз ').length);
-                    const weatherResponse = await (await fetch(`https://wttr.in/${city}?format=3`)).text();
+                    const city: any = content.slice((pref + 'прогноз ').length);
+                    const weatherResponse: any = await (await fetch(`https://wttr.in/${city}?format=3`)).text();
                     bot.sendMessage(chatId, `Погода в ` + weatherResponse, {
                         reply_to_message_id: msg.message_id
                     });
@@ -964,8 +959,8 @@ async function main(args) {
             }
 
             else if (content.startsWith(pref + 'duckduckgo')) { // поиск в утке
-                let query = content.slice((pref + 'duckduckgo').length).trim();
-                const response = await (await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_redirect=1&skip_disambig=1`)).json();
+                let query: any = content.slice((pref + 'duckduckgo').length).trim();
+                const response: any = await (await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_redirect=1&skip_disambig=1`)).json();
                 if (response.AbstractText) {
                     bot.sendMessage(chatId, `Результат поиска:\n\n<blockquote>${response.AbstractText}</blockquote>`, {
                         reply_to_message_id: msg.message_id,
@@ -979,12 +974,11 @@ async function main(args) {
             }
 
             else if (content == pref + 'инфо') {
-                bot.sendMessage(chatId, '<b>ABOBA</b> Bot − Ремейк легендарного бота из 2021 в Телеграме.\n@tg_aboba_bot\n\nБот:<blockquote>⚙️Написан на — JavaScript\n💫Создатель — <a href=\`t.me/burnderd\`>@Burnderd</a>\n📈Статус — работает</blockquote>\nБиблиотеки:<blockquote>💭Перевод — Translatte\n👁️OCR — Tesseract.js\n🎙️TTS — gTTS\n🎥Загрузка видео — ytdl</blockquote>', {
+                bot.sendMessage(chatId, '<b>ABOBA</b> Bot − Ремейк легендарного бота из 2021 в Телеграме.\n@tg_aboba_bot\n\nБот:<blockquote>⚙️ Написан на — TypeScript\n💫 Создатель — <a href=\`t.me/burnderd\`>@Burnderd</a>\n📈 Статус — работает</blockquote>\nБиблиотеки:<blockquote>💭 Перевод — Translatte\n👁️ OCR — Tesseract.js\n🎙️ TTS — gTTS\n🎥 Загрузка видео — ytdl</blockquote>', {
                     parse_mode: `HTML`,
                     reply_to_message_id: msg.message_id
                 });
             }
-            // import { fetch } from `undici`;
 
             // /новое
 
@@ -1002,22 +996,13 @@ async function main(args) {
             }
 
             else if (msg.from.id === 5226378684 || content == pref + 'ирис') {
-                let send; // колхозный рандомайзер
-                
-                if (!(content == pref + 'ирис')) {
-                    send = Math.floor(Math.random() * 100);
-                } else {
-                    send = 50;
-                }
+                const msgArr: any = [`ирис дурак`, `ирис чмо`, `ирис педик`, `ирис говноед`, 
+                            `ирис шлюха`, `ирис лох`, `ирис отстой`, `ирис ублюдок`, `ирис козёл`, 
+                            `ирис мудак`, `ирис сасёт`, `ирис слабак`];
 
-                if (send == 50) {
-                    const prek = [`ирис дурак`, `ирис чмо`, `ирис педик`, `ирис говноед`, `ирис шлюха`, `ирис лох`, `ирис отстой`, `ирис ублюдок`, `ирис козёл`, `ирис мудак`, `ирис сасёт`, `ирис слабак`];
-                    const num = Math.floor(Math.random() * prek.length);
-
-                    bot.sendMessage(chatId, 'СМЕШНОЙ АНЕКДОТ ПРО ИРИСА: ' + prek[num], {
-                        reply_to_message_id: msg.message_id
-                    });
-                }
+                bot.sendMessage(chatId, 'СМЕШНОЙ АНЕКДОТ ПРО ИРИСА: ' + msgArr[Math.floor(Math.random() * msgArr.length)], {
+                    reply_to_message_id: msg.message_id
+                });
             }
 
             else if (content == `пиу` || content == `пинг`) {
@@ -1028,14 +1013,9 @@ async function main(args) {
         }
         
         try {
-            let b64Log = btoa(content); // шифрует сообщения чтобы не подглядывать
-            currentDate = new Date().toLocaleString();
-            currentDate = currentDate.replace(`GMT+0300 (Москва, стандартное время)`, ``); // колхоз для лога но работает
-            // console.log('[' + currentDate + '] ' + logInfo + 'Message in ' + chatId + ' (' + chatName + ')' + ' - \'' + b64Log + '\'');
-            throwLog('Message in ' + chatId + ' (' + chatName + ')' + ' - \'' + b64Log + '\'');
-        } catch (error) {
-            throwErr(error.message);
-        }
+            let b64Log: any = btoa(content); // шифрует сообщения чтобы не подглядывать
+            throwLog(`Message in ${chatName} (${chatId}) — \"${b64Log}\"`);
+        } catch (error) { }
     });
 
     throwLog('Бот запущен...');
