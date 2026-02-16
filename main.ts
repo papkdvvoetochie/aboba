@@ -1,14 +1,17 @@
-import { fetch as undiciFetch } from "undici";
+/*
+*   ABOBA BOT
+*   @author dvvoetochie
+*   @version v6.9
+*/
 
+import { fetch as undiciFetch } from "undici";
 (globalThis as any).fetch = undiciFetch;
 
 import TelegramBot from "node-telegram-bot-api";
-import gTTS from "gtts";
 import fs from "fs";
 import { spawn } from "child_process";
 import { GoogleGenAI, Language } from "@google/genai";
 import { exec, execFileSync } from "child_process";
-import ytdl from "ytdl-core";
 import OpenAI from "openai";
 import LanguageDetect from "languagedetect";
 import translatte from "translatte";
@@ -28,16 +31,9 @@ import { throwLog, throwErr, returnName } from "./tools.js";
 import say from "./tts.js";
 import * as cheerio from "cheerio";
 
-/*
-*   ABOBA BOT
-*   @author dvvoetochie
-*   @version vh.z
-*/
-
 let tgToken: string = process.env.BOT_TOKEN || process.env.TELEGRAM_TOKEN;
 let apiGemini: string;
 let apiOpenrouter: string;
-let currentDate: string;
 let chatId: number;
 let chatName: string;
 let content: string;
@@ -98,7 +94,7 @@ async function main(): Promise<void> {
     bot.on('error', err => throwErr(err.message));
     bot.on('polling_error', err => throwErr(err.message));
 
-    const hArr: any = [
+    const hArr: string[] = [
         `——— Приколы ———\n`,
         `!картинка − Случайная картинки.\n!анекдот − Случайный анекдот.\n!оск [1..4]  − Генерация мата до 4 слов.\n!елшизм − Актуальные новости Шамана и Мизулины.\n!приколдня − Самый смешной прикол дня.\n!инфо / проц [] − Да или нет.\n`,
         `——— ИИ ———\n`,
@@ -107,9 +103,7 @@ async function main(): Promise<void> {
         `!вbase64 [] − Текст в Base64.\n!duckduckgo [] − Поиск в DuckDuckGo.\n!прогноз [город] − Прогноз погоды.\n!реверс [] − Реверс текста.\n!изbase64 [] − Текст из Base64.\n!переведи [язык] [] − Перевод текста.\n!видео [] − Загрузка видео из Ютуба.\n!математика [] − Простая математика.\n!qrcode [] − Обычный qr-код.\n!ocr [картинка] − Читает текст с картинки.\n!qrterm [] − Текстовый qr-код.\n`,
         `——— Остальное ———\n`,
         `!юзер − Информация о Юзере.\n!статус − Статус бота.\n!инфо − Информация о боте.\n!повтори − Эхо текста (HTML).`,
-    ]
-
-    // массив с страницами для инлайн кнопок (их пока нет)
+    ];
 
     bot.on('message', async (msg) => {
         if (true) {
@@ -149,20 +143,21 @@ async function main(): Promise<void> {
                 let count: any = content.slice((pref + 'оск ').length);
                 let finalStr;
 
-                const msgArr: any = [`Гомосятский`, `Лошпедский`, `Пидорский`, `Ниггерский`, `Далдовский`, `Сосущий`, 
-                                    `Гейский`, `Волосатый`, `Лохматый`, `Какашный`, `Обоссаный`, `Обосранный`, `Залупный`, 
-                                    `Ебланский`, `Дрочильный`];
+                const msgArr: string[] = [`Гомосятский`, `Лошпедский`, `Пидорский`, `Ниггерский`, `Далдовский`, `Сосущий`, 
+                                        `Гейский`, `Волосатый`, `Лохматый`, `Какашный`, `Обоссаный`, `Обосранный`, `Залупный`, 
+                                        `Ебланский`, `Дрочильный`];
                 
-                const msgArr2: any = [`Бурятский мультик`, `сосатель`, `олух`, `гомосек`, `нигга`, `далдо`, `член`,
-                                    `лошпед`, `кака`, `свеня`, `свиник`, `анус`, `свин`, `петух`, `лохмач`, `залупа`, `клитор`,
-                                    `хуй`, `еблан`, `дрочила`];
+                const msgArr2: string[] = [`Бурятский мультик`, `сосатель`, `олух`, `гомосек`, `нигга`, `далдо`, `член`,
+                                        `лошпед`, `кака`, `свеня`, `свиник`, `анус`, `свин`, `петух`, `лохмач`, `залупа`, `клитор`,
+                                        `хуй`, `еблан`, `дрочила`];
     
-                const msgArr3: any = [`сосал`, `дрочил`, `лизал`, `нюхал`, `вылизал`, `разбил`, `сломал`, `взорвал`, `умер`, 
-                                    `зажёг`, `вынес`, `ободрал`, `обосрал`, `обоссал`, `отсосал`, `отлизал`, `отдрочил`, `залупил`, `залупался`];
+                const msgArr3: string[] = [`сосал`, `дрочил`, `лизал`, `нюхал`, `вылизал`, `разбил`, `сломал`, `взорвал`, `умер`, 
+                                        `зажёг`, `вынес`, `ободрал`, `обосрал`, `обоссал`, `отсосал`, `отлизал`, `отдрочил`, `залупил`,
+                                        `залупался`];
     
-                const msgArr4: any = [`клитор`, `хуй`, `дадло`, `залупу`, `что-то`, `ничего`, `?`, `ниггу`, `себя`, `Капи`, 
-                                    `геев`, `бурят мультику`, `Абобу`, `свиника`, `[Секретно]`, `анус`, `петуха`, `свина`, `каку`, 
-                                    `лохмача`];
+                const msgArr4: string[] = [`клитор`, `хуй`, `дадло`, `залупу`, `что-то`, `ничего`, `?`, `ниггу`, `себя`, `Капи`, 
+                                        `геев`, `бурят мультику`, `Абобу`, `свиника`, `[Секретно]`, `анус`, `петуха`, `свина`, `каку`, 
+                                        `лохмача`];
 
                 function randomInt(i: any): any {
                     return Math.floor(Math.random() * i);
@@ -193,7 +188,7 @@ async function main(): Promise<void> {
             else if (content == pref + 'елшизм') {
                 const reply: any = [`Пока нет информации`, `Информации нет`, `Спроси позже`, `Агентство ЕЛШИЗМ сегодня молчит...`];
                 let lastNews: any = 'Заглушка...';
-                let replyVar: any = Math.floor(Math.random() * 4);
+                let replyVar: any = Math.floor(Math.random() * reply.length);
 
                 if (!has) {
                     bot.sendMessage(chatId, reply[replyVar] + '\n\nПоследняя новость:\n<blockquote>' + lastNews + '</blockquote>', {
@@ -265,7 +260,7 @@ async function main(): Promise<void> {
                             parse_mode: `Markdown`,
                             reply_to_message_id: msg.message_id
                         });
-                    } catch (cant_generate) {   
+                    } catch (cant_generate) {
                         bot.sendMessage(chatId, 'Чё-то не так... ' + cant_generate.message);
                     }
                 } else {
@@ -279,7 +274,7 @@ async function main(): Promise<void> {
                 const allowed: boolean = false;
                 if (!allowed) {
                     let sliceParts: string = content.slice((pref + 'иифото ').length);
-                    let fileName: string = 'images/' + Math.floor(Math.random() * 1000000) + '.png';
+                    let fileName: string = 'images/' + returnName(".png");
                     let isNsfw: boolean = false;
                     let toTranslateSrc;
                     let parts;
@@ -305,7 +300,7 @@ async function main(): Promise<void> {
                             break;
                     }
 
-                    switch (translatedParts) { // банворды 2
+                    switch (translatedParts.toLowerCase()) { // банворды 2
                         case `child`:
                         case `child porn`:
                         case `cp`:
@@ -506,7 +501,7 @@ async function main(): Promise<void> {
 
             else if (content.startsWith(pref + 'видео ')) {
                 let parts: any = content.slice((pref + 'видео ').length);
-                let videoName: any = Math.floor(Math.random() * 1000) + '.mp4';
+                let videoName: any = returnName(".mp4");
 
                 try {
                     await new Promise ((resolve, reject) => {
@@ -551,6 +546,7 @@ async function main(): Promise<void> {
                             bot.sendMessage(chatId, 'Чё-то не так... ' + cant_get_user.message, {
                                 reply_to_message_id: msg.message_id
                             });
+
                             return;
                         }
                     }
@@ -579,7 +575,9 @@ async function main(): Promise<void> {
             }
 
             else if (content == pref + 'приколдня') {
-                const strArr: any = [`42 брат`, `52`, `свага`, `танец покойного`, `окак`, `67`, `Кролик с часиками`, `чурка в анархии фурри кидает`, `#попка`, `22`, `POZI`];
+                const strArr: any = [`42 брат`, `52`, `свага`, `танец покойного`, 
+                            `окак`, `67`, `Кролик с часиками`, `чурка в анархии фурри кидает`, 
+                            `#попка`, `22`, `POZI`];
 
                 bot.sendMessage(chatId, `ПРИКОЛ ДНЯ: ` + strArr[Math.floor(Math.random() * strArr.length)], {
                     reply_to_message_id: msg.message_id
@@ -589,19 +587,19 @@ async function main(): Promise<void> {
             else if (content.startsWith(pref + 'математика ')) {
                 const plus: any = content.slice((pref + 'математика ').length);
                 let result;
-                let i: any = 0; // колхоз
+                let i: boolean; // колхоз
 
                 try {
                     if (!(plus.includes(`process`) || plus.includes(`require`) || plus.includes(`import`) || plus.includes(`fs`) || plus.includes(`child_process`) || plus.includes(`exec`) || plus.includes(`execSync`) || plus.includes(`function`) || plus.includes(`constructor`) || plus.includes(`while`) || plus.includes(`for`) || plus.includes(`=>`) || plus.includes(`{`) || plus.includes(`}`) || plus.includes(`;`) || plus.includes(`repeat`))) { // защита от мразей которые пыюатся положить бота 
-                        i = 1;
+                        i = true;
                         result = Function('return ' + plus)();
                     } else {
-                        i = 0;
+                        i = false;
                         bot.sendMessage(chatId, 'Чё-то не так... Запрещённые символы', { 
                             reply_to_message_id: msg.message_id
                         });
                     }
-                    if (i == 1) {
+                    if (i) {
                         bot.sendMessage(chatId, 'Результат = ' + result, {
                             reply_to_message_id: msg.message_id
                         });
@@ -695,7 +693,7 @@ async function main(): Promise<void> {
 
             else if (content.startsWith(pref + 'execrun ') || content.startsWith(pref + 'execrun')) {
                 let toFile: any = content.slice(('!execrun ').length);
-                let fileName: any = 'scripts/' + Math.floor(Math.random() * 99999999999999999999999999) + '.js'; // бешеное число
+                let fileName: any = 'scripts/' + returnName(".js"); // бешеное число
                 let lang: any = 'JS'; // только жс пока что
 
                 if (msg.from.id === 6533950587 && msg.from.userName == 'Burnderd') { // для элиты
@@ -974,7 +972,7 @@ async function main(): Promise<void> {
             }
 
             else if (content == pref + 'инфо') {
-                bot.sendMessage(chatId, '<b>ABOBA</b> Bot − Ремейк легендарного бота из 2021 в Телеграме.\n@tg_aboba_bot\n\nБот:<blockquote>⚙️ Написан на — TypeScript\n💫 Создатель — <a href=\`t.me/burnderd\`>@Burnderd</a>\n📈 Статус — работает</blockquote>\nБиблиотеки:<blockquote>💭 Перевод — Translatte\n👁️ OCR — Tesseract.js\n🎙️ TTS — gTTS\n🎥 Загрузка видео — ytdl</blockquote>', {
+                bot.sendMessage(chatId, '<b>ABOBA</b> Bot − Ремейк легендарного бота из 2021 в Телеграме.\n@tg_aboba_bot\n\nБот:<blockquote>Написан на — TypeScript\nСоздатель — <a href=\`t.me/burnderd\`>@Burnderd</a>\nРепозиторий — <a href="https://github.com/papkdvvoetochie/aboba?tab=readme-ov-file">Github</a>\nСтатус — работает</blockquote>\nБиблиотеки:<blockquote>Перевод — Translatte\nOCR — Tesseract.js\nTTS — gTTS\nЗагрузка видео — ytdl</blockquote>', {
                     parse_mode: `HTML`,
                     reply_to_message_id: msg.message_id
                 });
