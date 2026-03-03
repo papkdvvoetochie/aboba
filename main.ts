@@ -90,6 +90,18 @@ async function sayNnave(say: any): Promise<void> {
     });
 }
 
+const msgArr = [];
+let finalMsg;
+
+async function generate() {
+    const _length = Math.floor(Math.random() * 5);
+    finalMsg = ``;
+
+    for (let i = 0; i < _length; i++) {
+        finalMsg += msgArr[Math.floor(Math.random() * msgArr.length)];
+    }
+}
+
 async function main(): Promise<void> {
     bot.on('error', err => throwErr(err.message));
     bot.on('polling_error', err => throwErr(err.message));
@@ -105,6 +117,8 @@ async function main(): Promise<void> {
         `!юзер − Информация о Юзере.\n!статус − Статус бота.\n!инфо − Информация о боте.\n!повтори − Эхо текста (HTML).`,
     ];
 
+    // массив с страницами для инлайн кнопок (их пока нет)
+
     bot.on('message', async (msg) => {
         if (true) {
             chatId = msg.chat.id;
@@ -112,7 +126,7 @@ async function main(): Promise<void> {
             content = msg.text || '';
 
             if (content.toLowerCase() == (pref + 'хелп').toLowerCase() || content.toLowerCase() == (pref + 'help').toLowerCase() || content.toLowerCase() == (pref + 'команды').toLowerCase()) {
-                bot.sendMessage(chatId, '⚙️<b>Команды</b>:<a href="https://files.catbox.moe/yxuuaz.png">\n' + blank + '</a>\n<blockquote>' + hArr[0] + hArr[1] + hArr[2] + hArr[3] + hArr[4] + hArr[5] + hArr[6] + hArr[7] + "</blockquote>", {
+                bot.sendMessage(chatId, '⚙️<b>Команды</b>:<a href="http://papkdvvoetochie.qzz.io/aboba/img/help.png">\n' + blank + '</a>\n<blockquote>' + hArr[0] + hArr[1] + hArr[2] + hArr[3] + hArr[4] + hArr[5] + hArr[6] + hArr[7] + "</blockquote>", {
                     parse_mode: `HTML`,
                     reply_to_message_id: msg.message_id,
                 });
@@ -120,15 +134,14 @@ async function main(): Promise<void> {
 
             else if (content.toLowerCase() === (pref + 'картинка').toLowerCase() || content.toLowerCase() == (pref + 'прикол').toLowerCase() || content.toLowerCase() == (pref + 'picture').toLowerCase()) {
                 try {
-                    let num: any = Math.floor(Math.random() * 15);
-                    throwLog('Random num = ' + num);
+                    let num: number = Math.floor(Math.random() * 15);
 
                     try {
-                        bot.sendPhoto(chatId, 'images/' + num + '.png', {
+                        bot.sendPhoto(chatId, `http://papkdvvoetochie.qzz.io/aboba/img/memes/${num}.png`, {
                             reply_to_message_id: msg.message_id
                         });
                     } catch (not_png) {
-                        bot.sendPhoto(chatId, 'images/' + num + '.jpg', {
+                        bot.sendPhoto(chatId, `http://papkdvvoetochie.qzz.io/aboba/img/memes/${num}.jpg`, {
                             reply_to_message_id: msg.message_id
                         });
                     }
@@ -740,16 +753,16 @@ async function main(): Promise<void> {
                     }
                 } else {
                     // ограниченная версия для лохов
-                    let risk: any = [`import`, `require`, `=>`, `process`, `ip`, `remove`, `eval`, `constructor`, `function`, 
+                    let risk: string[] = [`import`, `require`, `=>`, `process`, `ip`, `remove`, `eval`, `constructor`, `function`, 
                         `system32`, `tgToken.txt`, `tgToken_b64.txt`, `cd /`, `fetch`, 'C:', `32`, `PS`, `PowerShell`, `CMD`, 
                         `Terminal`, `wsl`, `xterm`, `windir`, `win32`, `explorer`, `openUrl:`, `stdout`, `stdin`, `exec`];
 
-                    let allowed: any = true;
+                    let allowed: boolean = true;
                     let stdOut;
 
                     for (const word of risk) {
                         if (toFile.includes(word)) {
-                            bot.sendMessage(chatId, word + ' Не поддерживается', {
+                            bot.sendMessage(chatId, `${word} Не поддерживается`, {
                                 reply_to_message_id: msg.message_id
                             });
                             allowed = false;
@@ -838,7 +851,7 @@ async function main(): Promise<void> {
             }
 
             else if (content == pref + 'офвпышывпш' || content == pref + 'владизболгарии' || content == pref + 'владизбеларуси' || content == pref + 'владизнорильска' || content == pref + 'владотбългария') {
-                bot.sendMessage(chatId, ` VLAD VLAD VLAD:<a href="https://files.catbox.moe/apr2h1.mp4">${blank}</a>`, {
+                bot.sendMessage(chatId, ` VLAD VLAD VLAD:<a href="http://papkdvvoetochie.qzz.io/aboba/videos/vlad.mp4">${blank}</a>`, {
                     reply_to_message_id: msg.message_id,
                     parse_mode: `HTML`
                 });
@@ -848,7 +861,7 @@ async function main(): Promise<void> {
                 let search: any = content.slice((pref + 'реддит ').length);
                 search = search.replace(` `, `+`);
 
-                const response: any = await (await fetch(`https://www.reddit.com/search.json?q=` + search + `&restrict_sr=off&sort=relevance&t=all`)).json();
+                const response: any = await (await fetch(`https://www.reddit.com/search.json?q=${search}&restrict_sr=off&sort=relevance&t=all`)).json();
                 try {
                     bot.sendMessage(chatId, response.data.children[0].data.url, {
                         parse_mode: `HTML`,
@@ -1006,8 +1019,29 @@ async function main(): Promise<void> {
             else if (content == `пиу` || content == `пинг`) {
                 bot.sendMessage(chatId, `ИРИС ШАЛАВА`);
             }
+
+            if (chatId === -1002617724619 && content.length < 150) {
+                msgArr.push(content);
+            }
+
+            if (chatId === -1002617724619) {
+                const _num: number = Math.floor(Math.random() * 15);
+
+                switch (_num) {
+                    case 1:
+                    case 5:
+                    case 15: {
+                        try {
+                            generate();
+                            bot.sendMessage(chatId, finalMsg);
+                        } catch (err) {
+                            throwErr(err.message);
+                        }
+                    }
+                }
+            }
         } else {
-            bot.sendMessage('Бот в разработке...'); // осталось с времён альфы
+            bot.sendMessage('Бот в разработке...');
         }
         
         try {
